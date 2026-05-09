@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.idea/
+.next/
+coverage/
+dist/
+node_modules/
+out/
+*.log
+*.out
+*.err
+*.tsbuildinfo
+apps/web/.next/
+apps/web/next-env.d.ts

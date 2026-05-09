@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showup2move-toolbox
+  labels:
+    app: showup2move-toolbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: showup2move-toolbox
+  template:
+    metadata:
+      labels:
+        app: showup2move-toolbox
+    spec:
+      containers:
+        - name: toolbox
+          image: us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:0.32.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --tools-file
+            - /app/tools.yaml
+            - --address
+            - 0.0.0.0
+            - --port
+            - "5000"
+            - --disable-reload
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+            - name: TOOLBOX_POSTGRES_HOST
+              value: postgres
+            - name: TOOLBOX_POSTGRES_PORT
+              value: "5432"
+            - name: TOOLBOX_POSTGRES_DATABASE
+              value: showup2move
+            - name: TOOLBOX_POSTGRES_USER
+              value: showup2move
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: showup2move-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: toolbox-config
+              mountPath: /app/tools.yaml
+              subPath: tools.yaml
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: toolbox-config
+          configMap:
+            name: showup2move-toolbox-config

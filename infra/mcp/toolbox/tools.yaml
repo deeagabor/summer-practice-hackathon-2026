@@ -1,0 +1,154 @@
+kind: source
+name: showup-postgres
+type: postgres
+host: ${TOOLBOX_POSTGRES_HOST:postgres}
+port: ${TOOLBOX_POSTGRES_PORT:5432}
+database: ${TOOLBOX_POSTGRES_DATABASE:showup2move}
+user: ${TOOLBOX_POSTGRES_USER:showup2move}
+password: ${POSTGRES_PASSWORD}
+---
+kind: tool
+name: get_platform_counts
+type: postgres-sql
+source: showup-postgres
+description: Read aggregate platform counts for users, events, conversations, messages, and audit logs.
+statement: |
+  SELECT
+    (SELECT count(*) FROM users) AS users,
+    (SELECT count(*) FROM events) AS events,
+    (SELECT count(*) FROM conversations) AS conversations,
+    (SELECT count(*) FROM messages) AS messages,
+    (SELECT count(*) FROM audit_logs) AS audit_logs;
+annotations:
+  readOnlyHint: true
+  destructiveHint: false
+---
+kind: tool
+name: list_recent_events
+type: postgres-sql
+source: showup-postgres
+description: List recent sports events with status, sport, venue, participant count, capacity, and start time.
+parameters:
+  - name: limit
+    type: integer
+    description: Maximum number of events to return, from 1 to 50.
+    default: 20
+    minValue: 1
+    maxValue: 50
+statement: |
+  SELECT
+    e.id,
+    e.title,
+    e.status,
+    e.visibility,
+    s.name AS sport,
+    e.location_name,
+    e.city,
+    e.starts_at,
+    e.capacity,
+    count(ep.user_id) AS participant_count
+  FROM events e
+  JOIN sports s ON s.id = e.sport_id
+  LEFT JOIN event_participants ep ON ep.event_id = e.id
+  GROUP BY e.id, s.name
+  ORDER BY e.starts_at DESC
+  LIMIT $1;
+annotations:
+  readOnlyHint: true
+  destructiveHint: false
+---
+kind: tool
+name: search_users_by_email
+type: postgres-sql
+source: showup-postgres
+description: Find users by partial email for local admin/debug workflows. Do not use for public user lookup.
+parameters:
+  - name: email_query
+    type: string
+    description: Case-insensitive email fragment to search.
+statement: |
+  SELECT
+    u.id,
+    u.email,
+    u.name,
+    u.status,
+    array_agg(ur.role ORDER BY ur.role) AS roles,
+    u.created_at
+  FROM users u
+  LEFT JOIN user_roles ur ON ur.user_id = u.id
+  WHERE u.email ILIKE '%' || $1 || '%'
+  GROUP BY u.id
+  ORDER BY u.created_at DESC
+  LIMIT 20;
+annotations:
+  readOnlyHint: true
+  destructiveHint: false
+---
+kind: tool
+name: list_event_messages
+type: postgres-sql
+source: showup-postgres
+description: List recent messages for an event-specific conversation by event id.
+parameters:
+  - name: event_id
+    type: string
+    description: UUID of the event whose messages should be inspected.
+  - name: limit
+    type: integer
+    description: Maximum number of messages to return, from 1 to 100.
+    default: 50
+    minValue: 1
+    maxValue: 100
+statement: |
+  SELECT
+    m.id,
+    m.kind,
+    m.body,
+    m.created_at,
+    sender.email AS sender_email
+  FROM conversations c
+  JOIN messages m ON m.conversation_id = c.id
+  JOIN users sender ON sender.id = m.sender_id
+  WHERE c.event_id = $1::uuid
+  ORDER BY m.created_at DESC
+  LIMIT $2;
+annotations:
+  readOnlyHint: true
+  destructiveHint: false
+---
+kind: tool
+name: list_recent_audit_logs
+type: postgres-sql
+source: showup-postgres
+description: List recent admin/security-sensitive audit records.
+parameters:
+  - name: limit
+    type: integer
+    description: Maximum number of audit records to return, from 1 to 100.
+    default: 50
+    minValue: 1
+    maxValue: 100
+statement: |
+  SELECT
+    id,
+    actor_id,
+    action,
+    entity_type,
+    entity_id,
+    metadata,
+    created_at
+  FROM audit_logs
+  ORDER BY created_at DESC
+  LIMIT $1;
+annotations:
+  readOnlyHint: true
+  destructiveHint: false
+---
+kind: toolset
+name: readonly_admin
+tools:
+  - get_platform_counts
+  - list_recent_events
+  - search_users_by_email
+  - list_event_messages
+  - list_recent_audit_logs

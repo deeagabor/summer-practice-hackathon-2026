@@ -1,0 +1,99 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: showup2move-postgres
+    environment:
+      POSTGRES_DB: showup2move
+      POSTGRES_USER: showup2move
+      POSTGRES_PASSWORD: showup2move
+    ports:
+      - "5432:5432"
+    volumes:
+      - showup2move-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U showup2move -d showup2move"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: showup2move-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  db-migrate:
+    image: postgis/postgis:16-3.4
+    container_name: showup2move-db-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: showup2move
+    volumes:
+      - ./packages/database:/database:ro
+    command:
+      - sh
+      - -c
+      - |
+        if [ -z "$(psql -h postgres -U showup2move -d showup2move -Atc "SELECT to_regclass('public.users')")" ]; then
+          psql -h postgres -U showup2move -d showup2move -v ON_ERROR_STOP=1 -f /database/migrations/001_initial_schema.sql
+        fi
+        psql -h postgres -U showup2move -d showup2move -v ON_ERROR_STOP=1 -f /database/seed/001_sports.sql
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    image: showup2move-web:local
+    container_name: showup2move-web
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://showup2move:showup2move@postgres:5432/showup2move
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  worker:
+    image: showup2move-web:local
+    container_name: showup2move-worker
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://showup2move:showup2move@postgres:5432/showup2move
+      REDIS_URL: redis://redis:6379
+      WORKER_INTERVAL_MS: 30000
+      HOSTNAME: 0.0.0.0
+    command: ["node", "apps/web/src/server/worker.js"]
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  showup2move-postgres-data:

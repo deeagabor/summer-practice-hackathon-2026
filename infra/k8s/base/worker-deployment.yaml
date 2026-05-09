@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showup2move-worker
+  labels:
+    app: showup2move-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: showup2move-worker
+  template:
+    metadata:
+      labels:
+        app: showup2move-worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/replace-owner/showup2move-web:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - node
+            - apps/web/src/server/worker.js
+          envFrom:
+            - configMapRef:
+                name: showup2move-config
+            - secretRef:
+                name: showup2move-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

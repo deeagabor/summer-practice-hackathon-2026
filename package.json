@@ -1,0 +1,37 @@
+{
+  "name": "showup2move",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Responsive sports matching platform for spontaneous local activities.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @showup2move/web run dev",
+    "build": "npm run build --workspace @showup2move/shared && npm run build --workspace @showup2move/database && npm run build --workspace @showup2move/web",
+    "container:up": "docker compose -f docker-compose.local.yml up --build",
+    "container:down": "docker compose -f docker-compose.local.yml down",
+    "container:logs": "docker compose -f docker-compose.local.yml logs -f web worker",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "npm run typecheck --workspace @showup2move/shared && npm run typecheck --workspace @showup2move/database && npm run typecheck --workspace @showup2move/web",
+    "test": "npm run test --workspace @showup2move/shared && npm run test --workspace @showup2move/database && npm run test --workspace @showup2move/web",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "overrides": {
+    "postcss": "8.5.14"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.24.0",
+    "vitest": "^3.0.0"
+  }
+}
