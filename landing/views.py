@@ -4,15 +4,13 @@ from django.shortcuts import (
     get_object_or_404
 )
 
-from .models import (
-    Profile,
-    Sport,
-    Event,
-    ChatRoom,
-    ChatMessage
-)
-
 from django.contrib.auth.models import User
+
+from django.contrib.auth import (
+    authenticate,
+    login,
+    logout
+)
 
 from django.contrib import messages
 
@@ -21,36 +19,43 @@ from django.utils.dateparse import parse_datetime
 from .models import (
     Profile,
     Sport,
-    Event
+    Event,
+    ChatRoom,
+    ChatMessage
 )
 
 
 # HOME
 def home(request):
 
+    latest_events = (
+        Event.objects
+        .all()
+        .order_by("-created_at")[:6]
+    )
+
     return render(
         request,
-        'public/index.html'
+        'public/index.html',
+        {
+            "events": latest_events
+        }
     )
 
 
 # EVENT DETAIL
 def event_detail(request, eventId):
 
-    # LOGIN REQUIRED
     if not request.user.is_authenticated:
 
         return redirect('login')
 
-    # EVENT
     event = get_object_or_404(
         Event,
         event_id=eventId
     )
 
     # TEAM SIZE
-    # 2v2 -> 4
-    # 3v3 -> 6
     split = (
         event.team_size
         .lower()
@@ -62,22 +67,21 @@ def event_detail(request, eventId):
         int(split[1])
     )
 
-    # PARTICIPANTS
     participants = (
         event.participants.all()
     )
 
-    # INCLUDE CREATOR
+    # INCLUDE HOST
     all_players = [
         event.user
-    ] + list(participants)
+    ] + list(participants.exclude(
+        id=event.user.id
+    ))
 
-    # PLAYER COUNT
     current_players = len(
         all_players
     )
 
-    # CHECK IF USER JOINED
     user_joined = (
         request.user == event.user
         or
@@ -86,19 +90,17 @@ def event_detail(request, eventId):
         ).exists()
     )
 
-    # EVENT FULL
     event_full = (
         current_players >= max_players
     )
 
-    # POST ACTIONS
     if request.method == "POST":
 
         action = request.POST.get(
             "action"
         )
 
-        # JOIN EVENT
+        # JOIN
         if (
             action == "join_event"
             and not user_joined
@@ -114,7 +116,7 @@ def event_detail(request, eventId):
                 "You joined the event."
             )
 
-        # LEAVE EVENT
+        # LEAVE
         elif (
             action == "leave_event"
             and request.user != event.user
@@ -140,7 +142,8 @@ def event_detail(request, eventId):
         {
             "event": event,
 
-            "all_players": all_players,
+            "all_players":
+                all_players,
 
             "current_players":
                 current_players,
@@ -157,7 +160,7 @@ def event_detail(request, eventId):
     )
 
 
-# EVENTS PAGE
+# EVENTS
 def events(request):
 
     all_events = (
@@ -178,11 +181,23 @@ def events(request):
 # CHAT
 def chat(request, chatId):
 
+    room = get_object_or_404(
+        ChatRoom,
+        id=chatId
+    )
+
+    messages_list = (
+        ChatMessage.objects
+        .filter(room=room)
+        .order_by("created_at")
+    )
+
     return render(
         request,
         'public/chat.html',
         {
-            'chatId': chatId
+            'chat_room': room,
+            'messages': messages_list
         }
     )
 
@@ -190,30 +205,53 @@ def chat(request, chatId):
 # PROFILE
 def profile(request, username):
 
-    user = get_object_or_404(
+    profile_user = get_object_or_404(
         User,
         username=username
     )
 
     profile, _ = (
         Profile.objects.get_or_create(
-            user=user
+            user=profile_user
         )
     )
 
     sports = (
         Sport.objects.filter(
-            user=user
+            user=profile_user
         )
+    )
+
+    hosted_events = (
+        Event.objects.filter(
+            user=profile_user
+        ).count()
+    )
+
+    joined_events = (
+        Event.objects.filter(
+            participants=profile_user
+        ).count()
     )
 
     return render(
         request,
         'public/profileView.html',
         {
-            'profile_user': user,
-            'profile': profile,
-            'sports': sports
+            'profile_user':
+                profile_user,
+
+            'profile':
+                profile,
+
+            'sports':
+                sports,
+
+            'hosted_events':
+                hosted_events,
+
+            'joined_events':
+                joined_events
         }
     )
 
@@ -252,7 +290,7 @@ def settings(request):
             "action"
         )
 
-        # PROFILE
+        # UPDATE PROFILE
         if action == "profile":
 
             request.user.username = (
@@ -270,7 +308,9 @@ def settings(request):
             request.user.save()
 
             profile.bio = (
-                request.POST.get("bio")
+                request.POST.get(
+                    "bio"
+                )
             )
 
             if request.FILES.get(
@@ -278,12 +318,17 @@ def settings(request):
             ):
 
                 profile.avatar = (
-                    request.FILES[
+                    request.FILES.get(
                         "avatar"
-                    ]
+                    )
                 )
 
             profile.save()
+
+            messages.success(
+                request,
+                "Profile updated."
+            )
 
         # ADD SPORT
         elif action == "add_sport":
@@ -296,22 +341,28 @@ def settings(request):
                 "level"
             )
 
-            if sport:
+            exists = (
+                Sport.objects.filter(
+                    user=request.user,
+                    name=sport
+                ).exists()
+            )
 
-                exists = (
-                    Sport.objects.filter(
-                        user=request.user,
-                        name=sport
-                    ).exists()
+            if (
+                sport
+                and not exists
+            ):
+
+                Sport.objects.create(
+                    user=request.user,
+                    name=sport,
+                    level=level
                 )
 
-                if not exists:
-
-                    Sport.objects.create(
-                        user=request.user,
-                        name=sport,
-                        level=level
-                    )
+                messages.success(
+                    request,
+                    "Sport added."
+                )
 
         # REMOVE SPORT
         elif action == "remove_sport":
@@ -325,9 +376,20 @@ def settings(request):
                 user=request.user
             ).delete()
 
+            messages.success(
+                request,
+                "Sport removed."
+            )
+
         return redirect(
             'settings'
         )
+
+    user_sports = (
+        Sport.objects.filter(
+            user=request.user
+        )
+    )
 
     return render(
         request,
@@ -335,13 +397,9 @@ def settings(request):
         {
             'profile': profile,
 
-            'sports':
-                Sport.objects.filter(
-                    user=request.user
-                ),
+            'sports': user_sports,
 
-            'all_sports':
-                all_sports
+            'all_sports': all_sports
         }
     )
 
@@ -379,14 +437,14 @@ def create_event(request):
                 )
             )
 
-            start_time = parse_datetime(
-                start_time_raw
-            )
-
             duration_hours = (
                 request.POST.get(
                     "duration_hours"
                 )
+            )
+
+            start_time = parse_datetime(
+                start_time_raw
             )
 
             # VALIDATION
@@ -428,23 +486,15 @@ def create_event(request):
 
             )
 
-            event = Event.objects.create(
-                user=request.user,
-                sport=sport,
-                team_size=team_size,
-                venue=venue,
-                start_time=start_time,
-                duration_hours=int(duration_hours)
+            # OWNER AUTO JOIN
+            event.participants.add(
+                request.user
             )
 
-            # OWNER AUTO JOINS
-            event.participants.add(request.user)
-
-            # CREATE CHAT ROOM
+            # CREATE CHAT
             ChatRoom.objects.create(
                 event=event
             )
-
 
             messages.success(
                 request,
@@ -497,11 +547,8 @@ def login_view(request):
             )
 
         messages.error(
-
             request,
-
             "Wrong username or password"
-
         )
 
         return redirect(
@@ -536,11 +583,8 @@ def register_view(request):
         ).exists():
 
             messages.error(
-
                 request,
-
                 "Username already exists"
-
             )
 
             return redirect(

@@ -13,19 +13,34 @@
 
     <div class="content-inner mx-auto">
 
+        <!-- PROFILE HEADER -->
         <div class="d-flex align-items-center mb-4">
 
             <div class="avatar me-3">
-                <img src="https://i.imgur.com/uMe9eYU.jpeg">
+
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="avatar">
+                {% else %}
+                    <img src="https://i.imgur.com/uMe9eYU.jpeg" alt="avatar">
+                {% endif %}
+
             </div>
 
             <div>
-                <h4 class="mb-0">{{ user.username|default:"User" }}</h4>
-                <div class="muted">Joined recently</div>
+
+                <h4 class="mb-0">
+                    {{ profile_user.username }}
+                </h4>
+
+                <div class="muted">
+                    {{ profile.bio|default:"No bio yet." }}
+                </div>
+
             </div>
 
         </div>
 
+        <!-- EVENTS -->
         <div class="content-box p-3 mb-3">
 
             <h6 class="mb-3">Events</h6>
@@ -33,80 +48,92 @@
             <div class="row g-2">
 
                 <div class="col-6">
+
                     <div class="mini-box">
-                        <div class="muted">Hosted</div>
-                        <div class="mini-value">12</div>
+
+                        <div class="muted">
+                            Hosted
+                        </div>
+
+                        <div class="mini-value">
+                            {{ profile_user.event_set.count }}
+                        </div>
+
                     </div>
+
                 </div>
 
                 <div class="col-6">
+
                     <div class="mini-box">
-                        <div class="muted">Attended</div>
-                        <div class="mini-value">34</div>
+
+                        <div class="muted">
+                            Joined
+                        </div>
+
+                        <div class="mini-value">
+                            {{ profile_user.joined_events.count }}
+                        </div>
+
                     </div>
+
                 </div>
 
             </div>
 
         </div>
 
+        <!-- SPORTS -->
         <div class="content-box p-3 mb-3">
 
             <h6 class="mb-2">Sports</h6>
 
             <div class="d-flex flex-wrap gap-2">
-                <span class="tag">Football</span>
-                <span class="tag">Basketball</span>
-                <span class="tag">Tennis</span>
-                <span class="tag">Volleyball</span>
-                <span class="tag">Swimming</span>
-                <span class="tag">Gym</span>
-            </div>
 
-        </div>
+                {% for sport in sports %}
 
-        <div class="content-box p-3 mb-3">
+                    <span class="tag">
+                        {{ sport.name }}
+                    </span>
 
-            <h6 class="mb-2">Availability</h6>
+                {% empty %}
 
-            <div class="row g-2">
+                    <div class="muted">
+                        No sports added.
+                    </div>
 
-                <div class="col-md-3"><div class="box">Morning<br><small>08–11</small></div></div>
-                <div class="col-md-3"><div class="box">Afternoon<br><small>12–16</small></div></div>
-                <div class="col-md-3"><div class="box">Evening<br><small>17–22</small></div></div>
-                <div class="col-md-3"><div class="box">Weekends<br><small>Full Day</small></div></div>
+                {% endfor %}
 
             </div>
 
         </div>
 
+        <!-- SKILL LEVELS -->
         <div class="content-box p-3">
 
             <h6 class="mb-2">Skill Levels</h6>
 
-            <div class="skill d-flex justify-content-between">
-                <span>Football</span><span>Intermediate</span>
-            </div>
+            {% for sport in sports %}
 
-            <div class="skill d-flex justify-content-between">
-                <span>Basketball</span><span>Beginner</span>
-            </div>
+                <div class="skill d-flex justify-content-between">
 
-            <div class="skill d-flex justify-content-between">
-                <span>Tennis</span><span>Recreational</span>
-            </div>
+                    <span>
+                        {{ sport.name }}
+                    </span>
 
-            <div class="skill d-flex justify-content-between">
-                <span>Volleyball</span><span>Intermediate</span>
-            </div>
+                    <span>
+                        {{ sport.level }}
+                    </span>
 
-            <div class="skill d-flex justify-content-between">
-                <span>Swimming</span><span>Advanced</span>
-            </div>
+                </div>
 
-            <div class="skill d-flex justify-content-between">
-                <span>Gym</span><span>Competitive</span>
-            </div>
+            {% empty %}
+
+                <div class="muted">
+                    No skill levels added.
+                </div>
+
+            {% endfor %}
 
         </div>
 
