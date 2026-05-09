@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShowUp2Move | Smart Matching</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .font-bebas {
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .sport-chip {
+            transition: all 0.2s ease;
+        }
+
+        .sport-chip.selected {
+            background-color: #22c55e !important;
+            color: #000 !important;
+            border-color: #22c55e !important;
+            font-weight: bold;
+        }
+
+        #chat-panel {
+            display: none;
+        }
+
+        #chat-panel.open {
+            display: flex;
+        }
+
+        .msg {
+            max-width: 85%;
+            padding: 0.6rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .msg.ai {
+            background: #1e293b;
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg.user {
+            background: #22c55e;
+            color: black;
+            align-self: flex-end;
+            font-weight: 600;
+            border-bottom-right-radius: 4px;
+        }
+
+        .toast {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            transform: translateY(20px);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="page-register" class="page active relative min-h-screen">
+        <div
+            class="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30">
+        </div>
+
+        <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+            <div class="glass w-full max-w-lg p-8 rounded-[2rem] shadow-2xl">
+                <div class="font-bebas text-4xl text-green-500 tracking-wider mb-1">ShowUp<span
+                        class="text-white">2Move</span></div>
+                <div class="text-slate-400 text-sm mb-8">Find your sports crew. Show up. Move.</div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold tracking-widest uppercase text-slate-400 mb-2">Your
+                            Name</label>
+                        <input id="reg-name" type="text" placeholder="e.g. Alex M."
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-green-500 transition-colors" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold tracking-widest uppercase text-slate-400 mb-2">Bio /
+                            Description (AI will extract sports)</label>
+                        <textarea id="reg-desc" rows="2" placeholder="I love competitive football and casual tennis..."
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-green-500 transition-colors"></textarea>
+                        <div class="text-xs text-green-400 flex items-center gap-2 mt-2" id="ai-scanning"
+                            style="display:none">
+                            <i class="fa-solid fa-spinner fa-spin"></i> AI extracting sports...
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold tracking-widest uppercase text-slate-400 mb-2">Sports
+                            Interests</label>
+                        <div class="flex flex-wrap gap-2" id="sports-chips">
+                            <div class="sport-chip bg-slate-900 border border-slate-700 text-slate-300 px-4 py-2 rounded-full text-xs cursor-pointer hover:border-green-500 select-none"
+                                data-sport="football">⚽ Football</div>
+                            <div class="sport-chip bg-slate-900 border border-slate-700 text-slate-300 px-4 py-2 rounded-full text-xs cursor-pointer hover:border-green-500 select-none"
+                                data-sport="basketball">🏀 Basketball</div>
+                            <div class="sport-chip bg-slate-900 border border-slate-700 text-slate-300 px-4 py-2 rounded-full text-xs cursor-pointer hover:border-green-500 select-none"
+                                data-sport="tennis">🎾 Tennis</div>
+                            <div class="sport-chip bg-slate-900 border border-slate-700 text-slate-300 px-4 py-2 rounded-full text-xs cursor-pointer hover:border-green-500 select-none"
+                                data-sport="running">🏃 Running</div>
+                            <div class="sport-chip bg-slate-900 border border-slate-700 text-slate-300 px-4 py-2 rounded-full text-xs cursor-pointer hover:border-green-500 select-none"
+                                data-sport="yoga">🧘 Yoga</div>
+                        </div>
+                    </div>
+
+                    <button id="btn-register"
+                        class="w-full bg-green-500 hover:bg-green-400 text-black font-bebas text-xl tracking-widest p-4 rounded-xl transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)] mt-6">
+                        START MATCHING NOW →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-dashboard" class="page bg-slate-950 min-h-screen">
+        <nav
+            class="fixed top-0 w-full glass border-b border-slate-800 z-50 px-6 py-4 flex justify-between items-center">
+            <div class="font-bebas text-2xl text-green-500 tracking-wider">⚡ ShowUp2Move</div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-300 font-bold" id="nav-username">—</span>
+                <button id="btn-logout"
+                    class="text-xs border border-slate-700 text-slate-400 px-3 py-1.5 rounded-lg hover:border-red-500 hover:text-red-500 transition-colors uppercase font-bold">LOGOUT</button>
+            </div>
+        </nav>
+
+        <div class="pt-28 px-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 pb-10">
+            <div class="md:col-span-4 space-y-6">
+                <div
+                    class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-t-4 border-t-green-500 shadow-xl">
+                    <div class="font-bebas text-xl text-white tracking-widest mb-2">⚡ SHOWUPTODAY?</div>
+                    <div class="text-sm text-slate-400 mb-4">Are you ready to move today?</div>
+
+                    <div id="avail-status-box"
+                        class="hidden text-sm text-center p-3 rounded-xl mb-4 font-bold bg-slate-800 text-green-400 border border-green-500/20">
+                    </div>
+
+                    <div class="flex gap-2" id="showup-btns">
+                        <button id="btn-yes"
+                            class="flex-1 bg-green-500 text-black font-bold p-3 rounded-xl text-xs hover:bg-green-400 transition">✓
+                            YES, I'M IN</button>
+                        <button id="btn-no"
+                            class="flex-1 bg-slate-800 border border-slate-700 text-slate-300 font-bold p-3 rounded-xl text-xs hover:bg-red-500 hover:text-white hover:border-red-500 transition">✗
+                            NOT TODAY</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-8">
+                <div class="font-bebas text-2xl tracking-widest mb-4">🔍 DISCOVER YOUR CREW</div>
+
+                <div class="flex gap-2 mb-8 bg-slate-900 p-2 rounded-2xl border border-slate-800">
+                    <input id="sport-search" type="text" placeholder="Search sport... (e.g., tennis)"
+                        class="flex-1 bg-transparent border-none text-white outline-none px-4" />
+                    <button id="btn-search"
+                        class="bg-green-500 text-black px-6 py-2 rounded-xl font-bold hover:bg-green-400 transition">FIND</button>
+                </div>
+
+                <div id="match-results" class="space-y-4">
+                    <div class="text-center p-12 bg-slate-900/50 rounded-3xl border border-slate-800/50 border-dashed">
+                        <div class="text-4xl mb-4 opacity-50">👥</div>
+                        <div class="text-slate-400 text-sm">Search for a sport to find players</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
+        <div id="chat-panel"
+            class="w-80 sm:w-96 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl mb-4 flex-col overflow-hidden">
+            <div class="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center">
+                <div class="font-bebas text-green-400 tracking-wider"><i class="fa-solid fa-robot mr-2"></i> AI MATCH
+                    ASSISTANT</div>
+                <button id="chat-close" class="text-slate-400 hover:text-white"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 h-64 overflow-y-auto flex flex-col gap-3 bg-slate-900/50">
+                <div class="msg ai">Welcome! I can help you find the best teammates. What sport are we playing today?
+                </div>
+            </div>
+            <div class="p-3 border-t border-slate-800 flex gap-2 bg-slate-900">
+                <input type="text" id="chat-input" placeholder="Ask anything..."
+                    class="flex-1 bg-slate-800 text-white text-sm px-4 py-2 rounded-xl outline-none focus:ring-1 focus:ring-green-500" />
+                <button id="chat-send" class="bg-green-500 text-black px-4 rounded-xl hover:bg-green-400"><i
+                        class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button id="chat-fab"
+            class="bg-green-500 text-black w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:scale-110 transition-transform">
+            <i class="fa-solid fa-comment-dots"></i>
+        </button>
+    </div>
+
+    <div id="toast"
+        class="toast fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 border border-green-500 text-white px-6 py-3 rounded-full text-sm font-bold z-[100] shadow-xl text-center min-w-[250px]">
+    </div>
+
+    <script src="./script.js" defer></script>
+</body>
+
+</html>
