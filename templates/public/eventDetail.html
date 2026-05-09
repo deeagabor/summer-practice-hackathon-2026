@@ -1,0 +1,331 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}
+Event Details - ShowUp2Move
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'css/pages/eventsCreate.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+
+    <div class="content-inner">
+
+        <div class="event-container">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h2 class="section-title mb-1">
+
+                        {{ event.sport }}
+                        {{ event.team_size }}
+
+                    </h2>
+
+                    <p class="text-muted mb-0">
+
+                        Event ID:
+                        {{ event.event_id }}
+
+                    </p>
+
+                </div>
+
+                {% if event_full %}
+
+                    <span class="badge bg-danger">
+
+                        Full
+
+                    </span>
+
+                {% else %}
+
+                <a
+                    href="{% url 'chat' event.event_id %}"
+                    class="btn-save"
+                >
+
+                    Chat
+
+                </a>
+
+                {% endif %}
+
+            </div>
+
+            <!-- MESSAGES -->
+            {% if messages %}
+
+                <div class="messages mb-3">
+
+                    {% for message in messages %}
+
+                        <div class="msg">
+
+                            {{ message }}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+            <!-- EVENT INFO -->
+            <div class="summary-box">
+
+                <h4 class="mb-4">
+                    Event Information
+                </h4>
+
+                <div class="summary-item">
+
+                    <span>
+                        Sport
+                    </span>
+
+                    <span>
+                        {{ event.sport }}
+                    </span>
+
+                </div>
+
+                <div class="summary-item">
+
+                    <span>
+                        Team Size
+                    </span>
+
+                    <span>
+                        {{ event.team_size }}
+                    </span>
+
+                </div>
+
+                <div class="summary-item">
+
+                    <span>
+                        Venue
+                    </span>
+
+                    <span>
+                        {{ event.venue }}
+                    </span>
+
+                </div>
+
+                <div class="summary-item">
+
+                    <span>
+                        Start Time
+                    </span>
+
+                    <span>
+                        {{ event.start_time }}
+                    </span>
+
+                </div>
+
+                <div class="summary-item">
+
+                    <span>
+                        Duration
+                    </span>
+
+                    <span>
+                        {{ event.duration_hours }}h
+                    </span>
+
+                </div>
+
+                <div class="summary-item">
+
+                    <span>
+                        Players
+                    </span>
+
+                    <span>
+
+                        {{ current_players }}/{{ max_players }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- TEAM -->
+            <div class="summary-box mt-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+
+                        <h4 class="mb-1">
+                            Team
+                        </h4>
+
+                        <small class="text-muted">
+
+                            Event participants
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <!-- PLAYERS -->
+                {% for player in all_players %}
+
+                    <div class="player-card mt-3">
+
+                        <div class="player-left">
+
+                            <div>
+
+                                <h5 class="mb-1">
+
+                                    {{ player.username }}
+
+                                </h5>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="d-flex justify-content-end mt-4 gap-3">
+
+            {% if request.user.is_authenticated %}
+
+                {% if user_joined %}
+
+                    {% if request.user != event.user %}
+
+                        <!-- LEAVE -->
+                        <form method="POST">
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="leave_event"
+                            >
+
+                            <button
+                                type="submit"
+                                class="btn-save"
+                            >
+
+                                Leave Event
+
+                            </button>
+
+                        </form>
+
+                    {% else %}
+
+                        <button
+                            class="btn-save"
+                            disabled
+                        >
+
+                            Event Owner
+
+                        </button>
+
+                    {% endif %}
+
+                {% else %}
+
+                    {% if event_full %}
+
+                        <button
+                            class="btn-save"
+                            disabled
+                        >
+
+                            Event Full
+
+                        </button>
+
+                    {% else %}
+
+                        <!-- JOIN -->
+                        <form method="POST">
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="join_event"
+                            >
+
+                            <button
+                                type="submit"
+                                class="btn-save"
+                            >
+
+                                Join Event
+
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                {% endif %}
+
+            {% else %}
+
+                <a
+                    href="{% url 'login' %}"
+                    class="btn-save"
+                >
+
+                    Login To Join
+
+                </a>
+
+            {% endif %}
+
+            <!-- BACK -->
+            <a
+                href="{% url 'events' %}"
+                class="btn-save"
+            >
+
+                Back
+
+            </a>
+
+        </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

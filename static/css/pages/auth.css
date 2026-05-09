@@ -1,0 +1,97 @@
+.auth-wrapper {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 30px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 2rem;
+    margin-bottom: 6px;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.tabs {
+    display: flex;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tab {
+    flex: 1;
+    padding: 10px;
+    background: var(--panel);
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tab.active {
+    background: var(--panel-2);
+    color: var(--text);
+}
+
+.form {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.form.active {
+    display: flex;
+}
+
+input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    outline: none;
+}
+
+input::placeholder {
+    color: var(--muted);
+}
+
+.btn-primary {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--accent);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: var(--panel-2);
+}
+
+.switch-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.switch-text span {
+    color: var(--text);
+    cursor: pointer;
+}

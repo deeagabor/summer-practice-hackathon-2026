@@ -1,0 +1,128 @@
+.chat-layout {
+    display: flex;
+    height: 90vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+}
+
+.logo {
+    margin: 0 0 15px 0;
+}
+
+.group {
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.group:hover {
+    border-color: var(--accent);
+}
+
+.group.active {
+    border-left: 3px solid var(--accent);
+}
+
+.group-name {
+    font-weight: 600;
+}
+
+.group-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+}
+
+.chat-header h3 {
+    margin: 0;
+}
+
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.msg {
+    display: flex;
+}
+
+.msg.left {
+    justify-content: flex-start;
+}
+
+.msg.right {
+    justify-content: flex-end;
+}
+
+.bubble {
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    word-wrap: break-word;
+}
+
+.msg.right .bubble {
+    background: var(--accent);
+}
+
+.input-bar {
+    display: flex;
+    gap: 10px;
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+}
+
+.input-bar input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    outline: none;
+}
+
+.input-bar button {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--accent);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.input-bar button:hover {
+    background: var(--panel-2);
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 0.9rem;
+}

@@ -1,0 +1,299 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}
+Events - ShowUp2Move
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'css/pages/events.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+
+    <div class="content-inner mx-auto">
+
+        <!-- HEADER -->
+        <div class="events-header">
+
+            <h1>
+                Events
+            </h1>
+
+            <!-- FILTER BAR -->
+            <div
+                class="filter-bar d-flex flex-wrap align-items-center"
+            >
+
+                <!-- SEARCH -->
+                <input
+                    id="searchInput"
+                    type="text"
+                    class="search-input"
+                    placeholder="Search games..."
+                >
+
+                <!-- SPORT FILTER -->
+                <select
+                    id="sportFilter"
+                    class="filter-select"
+                >
+
+                    <option value="all">
+                        All Sports
+                    </option>
+
+                    <option value="football">
+                        Football
+                    </option>
+
+                    <option value="basketball">
+                        Basketball
+                    </option>
+
+                    <option value="tennis">
+                        Tennis
+                    </option>
+
+                    <option value="volleyball">
+                        Volleyball
+                    </option>
+
+                </select>
+
+                <!-- STATUS FILTER -->
+                <select
+                    id="statusFilter"
+                    class="filter-select"
+                >
+
+                    <option value="all">
+                        All Status
+                    </option>
+
+                    <option value="upcoming">
+                        Upcoming
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <!-- EVENTS GRID -->
+        <div class="events-grid">
+
+            {% for event in events %}
+
+                <div
+                    class="event-card"
+
+                    data-name="{{ event.sport }} {{ event.team_size }}"
+
+                    data-sport="{{ event.sport|lower }}"
+
+                    data-status="upcoming"
+                >
+
+                    <!-- CARD TOP -->
+                    <div class="card-top">
+
+                        <h5>
+
+                            {{ event.sport }}
+                            {{ event.team_size }}
+
+                        </h5>
+
+                        <span class="badge upcoming">
+
+                            Upcoming
+
+                        </span>
+
+                    </div>
+
+                    <!-- META -->
+                    <div class="meta">
+
+                        {{ event.venue }}
+
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="desc">
+
+                        Created by
+                        {{ event.user.username }}
+
+                    </div>
+
+                    <!-- TAGS -->
+                    <div class="tags-inline">
+
+                        <span>
+
+                            {{ event.team_size }}
+
+                        </span>
+
+                        <span>
+
+                            {{ event.duration_hours }}h
+
+                        </span>
+
+                    </div>
+
+                    <!-- CARD BOTTOM -->
+                    <div class="card-bottom">
+
+                        <span>
+
+                            {{ event.start_time }}
+
+                        </span>
+
+                        <!-- FIXED URL -->
+                        <a
+                            href="{% url 'event_detail' event.event_id %}"
+                            class="btn-secondary"
+                        >
+                            View
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="empty-state">
+
+                    <h4>
+                        No events found
+                    </h4>
+
+                    <p>
+                        Create your first event.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+const sportFilter =
+    document.getElementById(
+        "sportFilter"
+    );
+
+const statusFilter =
+    document.getElementById(
+        "statusFilter"
+    );
+
+const cards =
+    document.querySelectorAll(
+        ".event-card"
+    );
+
+// FILTER FUNCTION
+function filterCards() {
+
+    const search =
+        searchInput.value.toLowerCase();
+
+    const sport =
+        sportFilter.value.toLowerCase();
+
+    const status =
+        statusFilter.value.toLowerCase();
+
+    cards.forEach(card => {
+
+        const name =
+            card.dataset.name.toLowerCase();
+
+        const cardSport =
+            card.dataset.sport;
+
+        const cardStatus =
+            card.dataset.status;
+
+        let show = true;
+
+        // SEARCH
+        if (
+            search &&
+            !name.includes(search)
+        ) {
+
+            show = false;
+
+        }
+
+        // SPORT
+        if (
+            sport !== "all" &&
+            cardSport !== sport
+        ) {
+
+            show = false;
+
+        }
+
+        // STATUS
+        if (
+            status !== "all" &&
+            cardStatus !== status
+        ) {
+
+            show = false;
+
+        }
+
+        card.style.display =
+            show ? "block" : "none";
+
+    });
+
+}
+
+// EVENTS
+searchInput.addEventListener(
+    "input",
+    filterCards
+);
+
+sportFilter.addEventListener(
+    "change",
+    filterCards
+);
+
+statusFilter.addEventListener(
+    "change",
+    filterCards
+);
+
+</script>
+
+{% endblock %}

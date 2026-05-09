@@ -1,0 +1,172 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}
+Chat - ShowUp2Move
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'css/pages/chat.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="chat-layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <h2 class="logo">
+            Team Chat
+        </h2>
+
+        <div class="group active">
+
+            <div class="group-name">
+
+                {{ event.sport }}
+                {{ event.team_size }}
+
+            </div>
+
+            <div class="group-meta">
+
+                {{ event.venue }}
+
+            </div>
+
+        </div>
+
+        <div class="mt-4">
+
+            <small class="text-muted">
+
+                Members
+
+            </small>
+
+            {% for player in event.participants.all %}
+
+                <div class="group mt-2">
+
+                    <div class="group-name">
+
+                        {{ player.username }}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat">
+
+        <!-- HEADER -->
+        <div class="chat-header">
+
+            <div>
+
+                <h3>
+
+                    {{ event.sport }}
+                    {{ event.team_size }}
+
+                </h3>
+
+                <span class="muted">
+
+                    {{ event.participants.count }}
+                    members
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- MESSAGES -->
+        <div
+            class="messages"
+            id="messages"
+        >
+
+            {% for msg in messages_list %}
+
+                <div
+                    class="msg {% if msg.user == request.user %}right{% else %}left{% endif %}"
+                >
+
+                    <div class="bubble">
+
+                        <strong>
+
+                            {{ msg.user.username }}
+
+                        </strong>
+
+                        <br>
+
+                        {{ msg.message }}
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-muted">
+
+                    No messages yet.
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- INPUT -->
+        <form
+            method="POST"
+            class="input-bar"
+        >
+
+            {% csrf_token %}
+
+            <input
+                type="text"
+                name="message"
+                placeholder="Type a message..."
+                required
+            >
+
+            <button type="submit">
+
+                Send
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+const messages =
+    document.getElementById("messages");
+
+messages.scrollTop =
+    messages.scrollHeight;
+
+</script>
+
+{% endblock %}

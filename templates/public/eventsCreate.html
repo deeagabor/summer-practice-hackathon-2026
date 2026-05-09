@@ -1,0 +1,419 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}Create Event - ShowUp2Move{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/eventsCreate.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+
+    <div class="content-inner">
+
+        <div class="event-container">
+
+            <h2 class="section-title">
+                Event Planning
+            </h2>
+
+            <!-- MESSAGES -->
+            {% if messages %}
+                <div class="messages mb-3">
+                    {% for message in messages %}
+                        <div class="msg">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- FORM -->
+            <form
+                method="POST"
+                action="{% url 'create_event' %}"
+            >
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="create_event"
+                >
+
+                <div class="row">
+
+                    <!-- SPORT -->
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Sport
+                        </label>
+
+                        <select
+                            name="sport"
+                            id="eventType"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select sport
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <!-- TEAM SIZE -->
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Team Size
+                        </label>
+
+                        <select
+                            name="team_size"
+                            id="teamSize"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select size
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <!-- VENUE -->
+                    <div class="col-12 mb-3">
+
+                        <label class="form-label">
+                            Venue
+                        </label>
+
+                        <select
+                            name="venue"
+                            id="venueSelect"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select venue
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <!-- START TIME -->
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Starts At
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            name="start_time"
+                            id="startTime"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- DURATION -->
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Duration (Hours)
+                        </label>
+
+                        <select
+                            name="duration_hours"
+                            id="endHour"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select duration
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <!-- SUMMARY -->
+                <div class="summary-box mt-4">
+
+                    <h4 class="mb-3">
+                        Event Summary
+                    </h4>
+
+                    <div class="summary-item">
+                        <span>Duration</span>
+                        <span id="summaryDuration">-</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Venue</span>
+                        <span id="summaryVenue">-</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Location</span>
+                        <span id="summaryLocation">-</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Price per hour</span>
+                        <span id="summaryHourly">-</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Total cost</span>
+                        <span id="summaryTotal">-</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Cost per person</span>
+                        <span id="summaryPerPerson">-</span>
+                    </div>
+
+                    <div class="mt-3">
+
+                        <a
+                            id="mapLink"
+                            href="#"
+                            target="_blank"
+                            class="map-link"
+                        >
+                            View Location
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <!-- SUBMIT -->
+                <div class="text-end mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn-save"
+                    >
+                        Create Event
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("EVENT PAGE LOADED");
+
+    // SPORTS
+    const sports = [
+        "Football",
+        "Basketball",
+        "Tennis",
+        "Volleyball"
+    ];
+
+    // TEAM SIZES
+    const teamSizes = [
+        "2v2",
+        "3v3",
+        "5v5",
+        "7v7",
+        "11v11"
+    ];
+
+    // VENUES
+    const venues = [
+
+        {
+            name: "Arena Baza",
+            location: "Timișoara",
+            hourly: 120,
+            maps: "https://maps.google.com"
+        },
+
+        {
+            name: "Central Court",
+            location: "Timișoara",
+            hourly: 90,
+            maps: "https://maps.google.com"
+        },
+
+        {
+            name: "City Stadium",
+            location: "Timișoara",
+            hourly: 150,
+            maps: "https://maps.google.com"
+        }
+
+    ];
+
+    // ELEMENTS
+    const eventType = document.getElementById("eventType");
+
+    const teamSize = document.getElementById("teamSize");
+
+    const venueSelect = document.getElementById("venueSelect");
+
+    const endHour = document.getElementById("endHour");
+
+    // SUMMARY
+    const summaryDuration =
+        document.getElementById("summaryDuration");
+
+    const summaryVenue =
+        document.getElementById("summaryVenue");
+
+    const summaryLocation =
+        document.getElementById("summaryLocation");
+
+    const summaryHourly =
+        document.getElementById("summaryHourly");
+
+    const summaryTotal =
+        document.getElementById("summaryTotal");
+
+    const summaryPerPerson =
+        document.getElementById("summaryPerPerson");
+
+    const mapLink =
+        document.getElementById("mapLink");
+
+    // FILL SELECTS
+    function fillSelect(select, items) {
+
+        items.forEach(item => {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                item.name || item;
+
+            option.textContent =
+                item.name || item;
+
+            select.appendChild(option);
+
+        });
+
+    }
+
+    fillSelect(eventType, sports);
+
+    fillSelect(teamSize, teamSizes);
+
+    fillSelect(venueSelect, venues);
+
+    // HOURS
+    for (let i = 1; i <= 12; i++) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = i;
+
+        option.textContent =
+            i + (i === 1 ? " hour" : " hours");
+
+        endHour.appendChild(option);
+
+    }
+
+    // UPDATE SUMMARY
+    function updateSummary() {
+
+        const selectedVenue =
+            venues.find(
+                venue => venue.name === venueSelect.value
+            );
+
+        const duration =
+            parseInt(endHour.value) || 0;
+
+        let players = 1;
+
+        if (teamSize.value.includes("v")) {
+
+            const split =
+                teamSize.value.split("v");
+
+            players =
+                parseInt(split[0]) +
+                parseInt(split[1]);
+
+        }
+
+        if (selectedVenue) {
+
+            const total =
+                selectedVenue.hourly * duration;
+
+            const perPerson =
+                players > 0
+                    ? total / players
+                    : total;
+
+            summaryDuration.textContent =
+                duration + " hours";
+
+            summaryVenue.textContent =
+                selectedVenue.name;
+
+            summaryLocation.textContent =
+                selectedVenue.location;
+
+            summaryHourly.textContent =
+                selectedVenue.hourly + " RON";
+
+            summaryTotal.textContent =
+                total + " RON";
+
+            summaryPerPerson.textContent =
+                perPerson.toFixed(2) + " RON";
+
+            mapLink.href =
+                selectedVenue.maps;
+
+        }
+
+    }
+
+    // EVENTS
+    venueSelect.addEventListener(
+        "change",
+        updateSummary
+    );
+
+    teamSize.addEventListener(
+        "change",
+        updateSummary
+    );
+
+    endHour.addEventListener(
+        "change",
+        updateSummary
+    );
+
+});
+</script>
+
+{% endblock %}

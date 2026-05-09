@@ -1,0 +1,337 @@
+<!-- profileSettings.html -->
+
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}
+Profile Settings - ShowUp2Move
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/profileSettings.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+
+    <div class="content-inner">
+
+        <div class="profile-container">
+
+            <div class="row">
+
+                <!-- SIDEBAR -->
+                <div class="col-lg-3 mb-4">
+
+                    <div class="settings-nav">
+
+                        <div class="nav flex-column nav-pills">
+
+                            <button class="nav-link active"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#profileTab"
+                                    type="button">
+                                Profile
+                            </button>
+
+                            <button class="nav-link"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#sportsTab"
+                                    type="button">
+                                Sports
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- CONTENT -->
+                <div class="col-lg-9">
+
+                    <div class="tab-content">
+
+                        <!-- PROFILE -->
+                        <div class="tab-pane fade show active"
+                             id="profileTab">
+
+                            <div class="settings-content">
+
+                                <form method="POST"
+                                      enctype="multipart/form-data">
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden"
+                                           name="action"
+                                           value="profile">
+
+                                    <h2 class="section-title">
+                                        Profile Settings
+                                    </h2>
+
+                                    <div class="d-flex align-items-center mb-4 gap-3">
+
+                                        <input type="file"
+                                               name="avatar"
+                                               id="avatarUpload"
+                                               hidden
+                                               accept="image/*">
+
+                                        <label for="avatarUpload"
+                                               class="profile-avatar">
+
+                                            {% if profile.avatar %}
+                                            <img id="avatarPreview"
+                                                 src="{{ profile.avatar.url }}">
+                                            {% else %}
+                                            <img id="avatarPreview"
+                                                 src="https://i.imgur.com/uMe9eYU.jpeg">
+                                            {% endif %}
+
+                                            <div class="avatar-overlay">
+                                                <i class="fas fa-camera"></i>
+                                            </div>
+
+                                        </label>
+
+                                        <div>
+                                            <h3 class="username mb-1">
+                                                {{ profile.user.username }}
+                                            </h3>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label class="form-label">
+                                            Username
+                                        </label>
+
+                                        <input class="form-control"
+                                               name="username"
+                                               value="{{ profile.user.username }}">
+
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label class="form-label">
+                                            Email
+                                        </label>
+
+                                        <input class="form-control"
+                                               name="email"
+                                               value="{{ profile.user.email }}">
+
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label class="form-label">
+                                            Bio
+                                        </label>
+
+                                        <textarea class="form-control"
+                                                  name="bio"
+                                                  rows="4">{{ profile.bio }}</textarea>
+
+                                    </div>
+
+                                    <div class="text-end">
+
+                                        <button type="submit"
+                                                class="btn-save">
+                                            Save Profile
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                        <!-- SPORTS -->
+                        <div class="tab-pane fade"
+                             id="sportsTab">
+
+                            <div class="settings-content">
+
+                                <h2 class="section-title">
+                                    Sports
+                                </h2>
+
+                                <!-- ADD SPORT -->
+                                <form method="POST">
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden"
+                                           name="action"
+                                           value="add_sport">
+
+                                    <div class="row g-3">
+
+                                        <div class="col-md-6">
+
+                                            <label class="form-label">
+                                                Add Sport
+                                            </label>
+
+                                            <select name="sport"
+                                                    class="form-select">
+
+                                                {% for sport in all_sports %}
+                                                <option value="{{ sport }}">
+                                                    {{ sport }}
+                                                </option>
+                                                {% endfor %}
+
+                                            </select>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            <label class="form-label">
+                                                Skill Level
+                                            </label>
+
+                                            <select name="level"
+                                                    class="form-select">
+
+                                                <option value="Beginner">
+                                                    Beginner
+                                                </option>
+
+                                                <option value="Recreational">
+                                                    Recreational
+                                                </option>
+
+                                                <option value="Intermediate"
+                                                        selected>
+                                                    Intermediate
+                                                </option>
+
+                                                <option value="Advanced">
+                                                    Advanced
+                                                </option>
+
+                                                <option value="Competitive">
+                                                    Competitive
+                                                </option>
+
+                                                <option value="Elite">
+                                                    Elite
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <button type="submit"
+                                            class="btn-save mt-3 mb-4">
+                                        Add Sport
+                                    </button>
+
+                                </form>
+
+                                <hr>
+
+                                <h5 class="mb-3">
+                                    Your Sports
+                                </h5>
+
+                                {% for sport in sports %}
+
+                                <div class="p-3 mb-3 content-box">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+
+                                        <strong>
+                                            {{ sport.name }}
+                                        </strong>
+
+                                        <form method="POST">
+
+                                            {% csrf_token %}
+
+                                            <input type="hidden"
+                                                   name="action"
+                                                   value="remove_sport">
+
+                                            <input type="hidden"
+                                                   name="sport_id"
+                                                   value="{{ sport.id }}">
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger">
+                                                Remove
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                    <div class="mt-2 muted">
+                                        Skill Level: {{ sport.level }}
+                                    </div>
+
+                                </div>
+
+                                {% empty %}
+
+                                <p class="muted">
+                                    No sports added yet.
+                                </p>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+const avatarInput = document.getElementById("avatarUpload");
+const avatarPreview = document.getElementById("avatarPreview");
+
+avatarInput.addEventListener("change", e => {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        avatarPreview.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}Home - ShowUp2Move{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+    <div class="content-inner mx-auto">
+
+        <!-- HERO SECTION -->
+        <div class="hero-screen">
+            <div class="hero-content">
+
+                <h1 class="logo">ShowUp2Move</h1>
+
+                <p class="mt-1 mb-3">
+                    Find a game nearby or start one instantly.
+                </p>
+
+                <div class="action-buttons">
+                    <a href="/events/" class="btn-primary">Join Game</a>
+                    <a href="/events/" class="btn-secondary">Create Game</a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SECTION TITLE -->
+        <div class="section-title">Active Games</div>
+
+        <!-- FEED -->
+        <div class="feed">
+
+            <!-- CARD 1 -->
+            <div class="game-card active">
+                <div class="top">
+                    <div>
+                        <h5>Football 5v5</h5>
+                        <div class="meta">Arena Baza • 2.1 km away</div>
+                    </div>
+                    <div class="tag">Live</div>
+                </div>
+
+                <p class="desc">
+                    Casual match already running. Two spots open.
+                </p>
+
+                <div class="bottom">
+                    <span>8 / 10 players</span>
+                    <a href="/events/" class="btn-secondary">View</a>
+                </div>
+            </div>
+
+            <!-- CARD 2 -->
+            <div class="game-card active">
+                <div class="top">
+                    <div>
+                        <h5>Basketball 3v3</h5>
+                        <div class="meta">Central Court • 1.4 km away</div>
+                    </div>
+                    <div class="tag">Live</div>
+                </div>
+
+                <p class="desc">
+                    Fast-paced game in progress. Join instantly.
+                </p>
+
+                <div class="bottom">
+                    <span>5 / 6 players</span>
+                    <a href="/events/" class="btn-secondary">View</a>
+                </div>
+            </div>
+
+            <!-- CARD 3 -->
+            <div class="game-card">
+                <div class="top">
+                    <div>
+                        <h5>Tennis Doubles</h5>
+                        <div class="meta">City Courts • 3.2 km away</div>
+                    </div>
+                    <div class="tag">Upcoming</div>
+                </div>
+
+                <p class="desc">
+                    Friendly doubles match later today.
+                </p>
+
+                <div class="bottom">
+                    <span>2 / 4 players</span>
+                    <a href="/events/" class="btn-secondary">View</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
